@@ -4,7 +4,7 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import { useAppStore } from '../store';
 import { useSpeech } from '../utils/speech';
 import { generateMathExercise, MathProblem, MathConfig } from '../utils/mathGenerator';
-import { ArrowLeft, Volume2, Calculator, CheckCircle2, XCircle, Home, RotateCcw, AlertCircle, Clock, BarChart3, RotateCw } from 'lucide-react';
+import { ArrowLeft, Volume2, Calculator, CheckCircle2, XCircle, Home, RotateCcw, AlertCircle, Clock, BarChart3 } from 'lucide-react';
 import Confetti from '../components/Confetti';
 
 // 错题记录类型
