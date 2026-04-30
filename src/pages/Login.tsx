@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useAppStore } from '../store';
 
 export default function Login() {
@@ -14,7 +14,6 @@ export default function Login() {
   const login = useAppStore(state => state.login);
   const register = useAppStore(state => state.register);
   const isLoggedIn = useAppStore(state => state.isLoggedIn);
-  const navigate = useNavigate();
   
   useEffect(() => {
     try {
@@ -51,7 +50,7 @@ export default function Login() {
       }
       
       if (success) {
-        navigate('/');
+        window.location.href = '/';
       }
     } catch {
       setError('发生错误，请重试');
@@ -64,32 +63,32 @@ export default function Login() {
     <div className="min-h-screen bg-gradient-to-br from-purple-400 via-pink-400 to-orange-400 flex items-center justify-center p-4 md:p-8">
       <div className="bg-white rounded-3xl p-8 w-full max-w-md md:max-w-lg shadow-2xl md:p-12">
         <div className="text-center mb-8">
-          <div className="text-6xl mb-4">🎓</div>
-          <h1 className="text-3xl font-bold text-gray-800">
+          <div className="text-6xl mb-4 md:text-7xl">🎓</div>
+          <h1 className="text-3xl font-bold text-gray-800 md:text-4xl">
             {isLogin ? '欢迎回来！' : '加入我们！'}
           </h1>
-          <p className="text-gray-500 mt-2">
+          <p className="text-gray-500 mt-2 md:text-lg">
             {isLogin ? '登录你的账户' : '创建一个新账户'}
           </p>
         </div>
         
         {error && (
-          <div className="bg-red-100 text-red-600 rounded-2xl p-4 mb-6 text-center">
+          <div className="bg-red-100 text-red-600 rounded-2xl p-4 mb-6 text-center md:text-lg">
             {error}
           </div>
         )}
         
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
           {!isLogin && (
             <div>
-              <label className="block text-gray-700 font-medium mb-2">
+              <label className="block text-gray-700 font-medium mb-2 md:text-lg">
                 👤 昵称
               </label>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all text-lg"
+                className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all text-lg md:text-xl md:py-4"
                 placeholder="输入你的昵称"
                 required
               />
@@ -97,28 +96,28 @@ export default function Login() {
           )}
           
           <div>
-            <label className="block text-gray-700 font-medium mb-2">
+            <label className="block text-gray-700 font-medium mb-2 md:text-lg">
               📧 邮箱
             </label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all text-lg"
+              className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all text-lg md:text-xl md:py-4"
               placeholder="输入你的邮箱"
               required
             />
           </div>
           
           <div>
-            <label className="block text-gray-700 font-medium mb-2">
+            <label className="block text-gray-700 font-medium mb-2 md:text-lg">
               🔒 密码
             </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all text-lg"
+              className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all text-lg md:text-xl md:py-4"
               placeholder="输入你的密码"
               required
             />
@@ -127,7 +126,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-4 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all disabled:opacity-50"
+            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-4 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all disabled:opacity-50 md:text-xl md:py-5"
           >
             {loading ? '请稍候...' : (isLogin ? '🚀 登录' : '🎉 注册')}
           </button>
@@ -139,7 +138,7 @@ export default function Login() {
               setIsLogin(!isLogin);
               setError('');
             }}
-            className="text-purple-600 font-medium hover:text-purple-700 transition-colors"
+            className="text-purple-600 font-medium hover:text-purple-700 transition-colors md:text-lg"
           >
             {isLogin ? '还没有账户？立即注册 →' : '已有账户？去登录 →'}
           </button>

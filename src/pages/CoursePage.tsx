@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Navigate } from 'react-router-dom';
 import { courses } from '../data/initialData';
 import { useAppStore } from '../store';
@@ -26,6 +26,7 @@ export default function CoursePage() {
   const [showCelebration, setShowCelebration] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const progress = course ? getCourseProgress(course.id) : null;
   
   useEffect(() => {
@@ -44,13 +45,27 @@ export default function CoursePage() {
   
   useEffect(() => {
     if (!soundEnabled || !course) return;
+    
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    
     const step = course.content[currentStep];
     if (step) {
       const textToSpeak = step.type === 'quiz' 
         ? `${step.title}。${step.question}` 
         : step.title + (step.description ? `。${step.description}` : '');
-      setTimeout(() => speakText(textToSpeak), 500);
+      
+      timeoutRef.current = setTimeout(() => {
+        speakText(textToSpeak);
+      }, 500);
     }
+    
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
   }, [currentStep, soundEnabled, course, speakText]);
   
   if (!isLoggedIn) {
@@ -58,7 +73,7 @@ export default function CoursePage() {
   }
   
   if (!course) {
-    return <div>课程不存在</div>;
+    return <Navigate to="/" replace />;
   }
   
   if (progress?.completed) {
@@ -132,7 +147,7 @@ export default function CoursePage() {
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 pb-24">
-      <div className="max-w-lg mx-auto px-4 py-6 md:max-w-3xl md:py-8">
+      <div className="max-w-lg mx-auto px-4 py-6 md:max-w-4xl md:py-8">
         <div className="flex items-center mb-6 md:mb-8">
           <button
             onClick={() => navigate(-1)}
@@ -175,7 +190,7 @@ export default function CoursePage() {
           </button>
         </div>
         
-        <div className="bg-white rounded-3xl p-6 shadow-xl md:p-8">
+        <div className="bg-white rounded-3xl p-6 shadow-xl md:p-10 md:max-w-2xl md:mx-auto">
           {step.type === 'intro' && (
             <div className="text-center">
               {step.image && (
