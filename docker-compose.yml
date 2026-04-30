@@ -2,16 +2,10 @@
 version: '3.8'
 
 services:
+  # 从远程仓库拉取镜像（推荐用于生产环境）
   kids-edu-platform:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      platforms:
-        - linux/amd64
-        - linux/arm64
-        - linux/arm/v7
-    image: kids-edu-platform:latest
-    container_name: kids-edu-platform
+    image: ghcr.io/maork321/kidsstudytoys:latest
+    container_name: kids-study-toys
     ports:
       - "8080:80"
     restart: unless-stopped
@@ -21,3 +15,17 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+
+  # 本地开发构建（用于开发调试）
+  kids-edu-platform-local:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: kids-edu-platform:local
+    container_name: kids-study-toys-local
+    ports:
+      - "8081:80"
+    restart: unless-stopped
+    profiles:
+      - local
+
