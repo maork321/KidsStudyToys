@@ -51,15 +51,15 @@ export default function NavBar() {
   
   return (
     <nav className={`fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 ${tvMode ? 'bg-gray-900 border-gray-700' : ''}`}>
-      <div className={`${tvMode ? 'max-w-4xl' : 'max-w-lg'} mx-auto`}>
-        <div className={`flex items-center justify-around py-3 ${tvMode ? 'py-6' : ''}`}>
+      <div className={`${tvMode ? 'max-w-4xl' : 'max-w-lg md:max-w-4xl'} mx-auto`}>
+        <div className={`flex items-center justify-around py-3 ${tvMode ? 'py-6' : 'md:py-4'}`}>
           {navItems.map((item, index) => (
             <NavLink
               key={item.path}
               to={item.path}
               className={({ isActive }) => {
                 const isTvActive = tvMode && activeIndex === index;
-                return `flex flex-col items-center px-4 py-2 rounded-2xl transition-all ${
+                return `flex flex-col items-center px-4 py-2 md:px-6 md:py-3 rounded-2xl transition-all ${
                   tvMode
                     ? isTvActive
                       ? 'bg-blue-600 text-white scale-110'
@@ -73,18 +73,18 @@ export default function NavBar() {
               }}
               onClick={() => tvMode && setActiveIndex(index)}
             >
-              <item.icon className={`${tvMode ? 'w-12 h-12' : 'w-6 h-6'}`} />
-              <span className={`mt-1 font-medium ${tvMode ? 'text-lg' : 'text-xs'}`}>
+              <item.icon className={`${tvMode ? 'w-12 h-12' : 'w-6 h-6 md:w-7 md:h-7'}`} />
+              <span className={`mt-1 font-medium ${tvMode ? 'text-lg' : 'text-xs md:text-sm'}`}>
                 {item.label}
               </span>
             </NavLink>
           ))}
           
-          <div className={`flex flex-col items-center ${tvMode ? 'px-6' : ''}`}>
-            <div className={`${tvMode ? 'bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full px-6 py-3 shadow-lg' : 'bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full px-4 py-2 shadow-lg'}`}>
+          <div className={`flex flex-col items-center ${tvMode ? 'px-6' : 'md:px-4'}`}>
+            <div className={`${tvMode ? 'bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full px-6 py-3 shadow-lg' : 'bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full px-4 py-2 md:px-5 md:py-2 shadow-lg'}`}>
               <div className="flex items-center gap-2">
-                <Coins className={`${tvMode ? 'w-8 h-8' : 'w-5 h-5'} text-white`} />
-                <span className={`font-bold text-white ${tvMode ? 'text-2xl' : 'text-sm'}`}>
+                <Coins className={`${tvMode ? 'w-8 h-8' : 'w-5 h-5 md:w-6 md:h-6'} text-white`} />
+                <span className={`font-bold text-white ${tvMode ? 'text-2xl' : 'text-sm md:text-base'}`}>
                   {userPoints?.availablePoints || 0}
                 </span>
               </div>

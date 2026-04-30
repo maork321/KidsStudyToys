@@ -61,8 +61,8 @@ export default function Login() {
   };
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-400 via-pink-400 to-orange-400 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl">
+    <div className="min-h-screen bg-gradient-to-br from-purple-400 via-pink-400 to-orange-400 flex items-center justify-center p-4 md:p-8">
+      <div className="bg-white rounded-3xl p-8 w-full max-w-md md:max-w-lg shadow-2xl md:p-12">
         <div className="text-center mb-8">
           <div className="text-6xl mb-4">🎓</div>
           <h1 className="text-3xl font-bold text-gray-800">

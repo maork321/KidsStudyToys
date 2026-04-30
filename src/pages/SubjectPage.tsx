@@ -1,5 +1,5 @@
 
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Navigate } from 'react-router-dom';
 import { subjects, courses } from '../data/initialData';
 import CourseCard from '../components/CourseCard';
 import NavBar from '../components/NavBar';
@@ -15,8 +15,7 @@ export default function SubjectPage() {
   const subjectCourses = courses.filter(c => c.subjectId === id);
   
   if (!isLoggedIn) {
-    navigate('/login');
-    return null;
+    return <Navigate to="/login" replace />;
   }
   
   if (!subject) {
@@ -27,8 +26,8 @@ export default function SubjectPage() {
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 pb-24">
-      <div className="max-w-lg mx-auto">
-        <div className={`bg-gradient-to-br ${subject.color} px-4 pt-12 pb-8`}>
+      <div className="max-w-lg mx-auto md:max-w-5xl">
+        <div className={`bg-gradient-to-br ${subject.color} px-4 pt-12 pb-8 md:px-8`}>
           <button
             onClick={() => navigate('/')}
             className="flex items-center text-white/90 hover:text-white mb-4"
@@ -38,37 +37,37 @@ export default function SubjectPage() {
           </button>
           
           <div className="text-center">
-            <div className="text-7xl mb-4">{subject.icon}</div>
-            <h1 className="text-3xl font-bold text-white mb-2">{subject.name}</h1>
-            <p className="text-white/80">{subject.description}</p>
+            <div className="text-7xl mb-4 md:text-8xl">{subject.icon}</div>
+            <h1 className="text-3xl font-bold text-white mb-2 md:text-4xl">{subject.name}</h1>
+            <p className="text-white/80 md:text-lg">{subject.description}</p>
           </div>
         </div>
         
-        <div className="px-4 py-6">
+        <div className="px-4 py-6 md:px-8 md:py-8">
           {id === 'math' && (
             <div className="mb-6">
               <button
                 onClick={() => navigate('/math-practice')}
-                className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3"
+                className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-2xl p-4 md:p-6 shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3"
               >
-                <Calculator className="w-8 h-8" />
+                <Calculator className="w-8 h-8 md:w-10 md:h-10" />
                 <div className="text-left">
-                  <div className="text-xl font-bold">🎯 快速练习</div>
-                  <div className="text-sm opacity-90">加减乘除，定制难度</div>
+                  <div className="text-xl font-bold md:text-2xl">🎯 快速练习</div>
+                  <div className="text-sm opacity-90 md:text-base">加减乘除，定制难度</div>
                 </div>
               </button>
             </div>
           )}
           
           {levels.map(level => (
-            <div key={level} className="mb-8">
-              <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                <span className="text-2xl mr-2">
+            <div key={level} className="mb-8 md:mb-10">
+              <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center md:text-2xl">
+                <span className="text-2xl mr-2 md:text-3xl">
                   {level === 1 ? '🌱' : level === 2 ? '🌿' : '🌳'}
                 </span>
                 等级 {level}
               </h2>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
                 {subjectCourses
                   .filter(c => c.level === level)
                   .map(course => (

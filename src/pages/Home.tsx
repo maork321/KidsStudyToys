@@ -76,22 +76,22 @@ export default function Home() {
   }
   
   const headerBg = tvMode ? 'bg-gradient-to-r from-blue-600 to-purple-600' : 'bg-gradient-to-r from-purple-500 to-pink-500';
-  const textSize = tvMode ? 'text-4xl' : 'text-2xl';
-  const subtitleSize = tvMode ? 'text-lg' : 'text-base';
-  const avatarSize = tvMode ? 'text-8xl' : 'text-6xl';
-  const avatarBadgeSize = tvMode ? 'text-3xl' : 'text-2xl';
-  const badgePadding = tvMode ? 'px-6 py-3' : 'px-4 py-2';
-  const sectionTitleSize = tvMode ? 'text-3xl' : 'text-xl';
-  const iconSize = tvMode ? 'text-4xl' : 'text-2xl';
-  const gridCols = tvMode ? 'grid-cols-4' : 'grid-cols-2';
-  const sectionGap = tvMode ? 'gap-6 mb-12' : 'gap-4 mb-8';
+  const textSize = tvMode ? 'text-4xl' : 'text-2xl md:text-3xl';
+  const subtitleSize = tvMode ? 'text-lg' : 'text-base md:text-lg';
+  const avatarSize = tvMode ? 'text-8xl' : 'text-6xl md:text-7xl';
+  const avatarBadgeSize = tvMode ? 'text-3xl' : 'text-2xl md:text-3xl';
+  const badgePadding = tvMode ? 'px-6 py-3' : 'px-4 py-2 md:px-6 md:py-3';
+  const sectionTitleSize = tvMode ? 'text-3xl' : 'text-xl md:text-2xl';
+  const iconSize = tvMode ? 'text-4xl' : 'text-2xl md:text-3xl';
+  const gridCols = tvMode ? 'grid-cols-4' : 'grid-cols-2 md:grid-cols-4';
+  const sectionGap = tvMode ? 'gap-6 mb-12' : 'gap-4 mb-8 md:gap-6 md:mb-10';
   const sectionTextColor = tvMode ? 'text-white' : 'text-gray-800';
   const pageBg = tvMode ? 'bg-gray-900' : 'bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50';
-  const badgeGap = tvMode ? 'gap-6' : 'gap-4';
+  const badgeGap = tvMode ? 'gap-6' : 'gap-4 md:gap-6';
   
   return (
     <div className={`min-h-screen pb-24 ${pageBg}`}>
-      <div className={`${tvMode ? 'max-w-5xl' : 'max-w-lg'} mx-auto px-4 py-6`}>
+      <div className={`${tvMode ? 'max-w-5xl' : 'max-w-lg md:max-w-6xl'} mx-auto px-4 py-6 md:py-8`}>
         <div className={`rounded-3xl p-6 mb-6 shadow-xl ${headerBg}`}>
           <div className="flex items-center justify-between">
             <div>

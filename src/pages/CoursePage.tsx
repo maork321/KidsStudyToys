@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Navigate } from 'react-router-dom';
 import { courses } from '../data/initialData';
 import { useAppStore } from '../store';
 import { useSpeech } from '../utils/speech';
@@ -54,8 +54,7 @@ export default function CoursePage() {
   }, [currentStep, soundEnabled, course, speakText]);
   
   if (!isLoggedIn) {
-    navigate('/login');
-    return null;
+    return <Navigate to="/login" replace />;
   }
   
   if (!course) {
@@ -64,18 +63,18 @@ export default function CoursePage() {
   
   if (progress?.completed) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl p-8 text-center max-w-md shadow-2xl">
-          <div className="text-8xl mb-6">🎉</div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-4">太棒了！</h1>
-          <p className="text-gray-600 mb-6">你已经完成了这个课程</p>
-          <div className="bg-yellow-100 rounded-2xl p-4 mb-6">
-            <span className="text-2xl">⭐</span>
-            <span className="ml-2 font-bold text-yellow-700 text-xl">+{course.points} 积分</span>
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 flex items-center justify-center p-4 md:p-8">
+        <div className="bg-white rounded-3xl p-8 text-center max-w-md md:max-w-lg shadow-2xl md:p-10">
+          <div className="text-8xl mb-6 md:text-9xl">🎉</div>
+          <h1 className="text-3xl font-bold text-gray-800 mb-4 md:text-4xl">太棒了！</h1>
+          <p className="text-gray-600 mb-6 md:text-lg">你已经完成了这个课程</p>
+          <div className="bg-yellow-100 rounded-2xl p-4 mb-6 md:p-6">
+            <span className="text-2xl md:text-3xl">⭐</span>
+            <span className="ml-2 font-bold text-yellow-700 text-xl md:text-2xl">+{course.points} 积分</span>
           </div>
           <button
             onClick={() => navigate('/')}
-            className="bg-gradient-to-r from-green-500 to-blue-500 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg"
+            className="bg-gradient-to-r from-green-500 to-blue-500 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg md:px-10 md:py-5 md:text-xl"
           >
             返回首页
           </button>
@@ -111,18 +110,18 @@ export default function CoursePage() {
   
   if (showCelebration) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-yellow-400 via-pink-400 to-purple-400 flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl p-8 text-center max-w-md shadow-2xl animate-bounce">
-          <div className="text-8xl mb-6">🏆</div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-4">恭喜完成！</h1>
-          <p className="text-gray-600 mb-6">你完成了 {course.title}</p>
-          <div className="bg-gradient-to-r from-yellow-100 to-orange-100 rounded-2xl p-6 mb-6">
-            <div className="text-4xl mb-2">⭐ +{course.points}</div>
-            <p className="text-orange-700 font-bold">获得 {course.points} 积分！</p>
+      <div className="min-h-screen bg-gradient-to-br from-yellow-400 via-pink-400 to-purple-400 flex items-center justify-center p-4 md:p-8">
+        <div className="bg-white rounded-3xl p-8 text-center max-w-md md:max-w-lg shadow-2xl animate-bounce md:p-10">
+          <div className="text-8xl mb-6 md:text-9xl">🏆</div>
+          <h1 className="text-3xl font-bold text-gray-800 mb-4 md:text-4xl">恭喜完成！</h1>
+          <p className="text-gray-600 mb-6 md:text-lg">你完成了 {course.title}</p>
+          <div className="bg-gradient-to-r from-yellow-100 to-orange-100 rounded-2xl p-6 mb-6 md:p-8">
+            <div className="text-4xl mb-2 md:text-5xl">⭐ +{course.points}</div>
+            <p className="text-orange-700 font-bold md:text-xl">获得 {course.points} 积分！</p>
           </div>
           <button
             onClick={() => navigate('/')}
-            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg"
+            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg md:px-10 md:py-5 md:text-xl"
           >
             继续探索 🚀
           </button>
@@ -132,23 +131,23 @@ export default function CoursePage() {
   }
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
-      <div className="max-w-lg mx-auto px-4 py-6">
-        <div className="flex items-center mb-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 pb-24">
+      <div className="max-w-lg mx-auto px-4 py-6 md:max-w-3xl md:py-8">
+        <div className="flex items-center mb-6 md:mb-8">
           <button
             onClick={() => navigate(-1)}
-            className="p-2 bg-white rounded-full shadow-lg mr-4"
+            className="p-2 bg-white rounded-full shadow-lg mr-4 md:p-3"
           >
-            <ArrowLeft className="w-6 h-6 text-gray-700" />
+            <ArrowLeft className="w-6 h-6 text-gray-700 md:w-7 md:h-7" />
           </button>
           <div className="flex-1">
-            <div className="bg-gray-200 rounded-full h-3 overflow-hidden">
+            <div className="bg-gray-200 rounded-full h-3 overflow-hidden md:h-4">
               <div 
                 className="bg-gradient-to-r from-blue-500 to-purple-500 h-full rounded-full transition-all duration-500"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
-            <p className="text-center text-gray-500 text-sm mt-2">
+            <p className="text-center text-gray-500 text-sm mt-2 md:text-base">
               {currentStep + 1} / {course.content.length}
             </p>
           </div>
@@ -166,29 +165,29 @@ export default function CoursePage() {
               soundEnabled 
                 ? 'bg-white hover:bg-blue-50' 
                 : 'bg-gray-200 opacity-50 cursor-not-allowed'
-            }`}
+            } md:p-3`}
           >
             {isSpeaking ? (
-              <VolumeX className="w-6 h-6 text-blue-500 animate-pulse" />
+              <VolumeX className="w-6 h-6 text-blue-500 animate-pulse md:w-7 md:h-7" />
             ) : (
-              <Volume2 className={`w-6 h-6 ${soundEnabled ? 'text-blue-500' : 'text-gray-400'}`} />
+              <Volume2 className={`w-6 h-6 ${soundEnabled ? 'text-blue-500' : 'text-gray-400'} md:w-7 md:h-7`} />
             )}
           </button>
         </div>
         
-        <div className="bg-white rounded-3xl p-6 shadow-xl">
+        <div className="bg-white rounded-3xl p-6 shadow-xl md:p-8">
           {step.type === 'intro' && (
             <div className="text-center">
               {step.image && (
-                <img src={step.image} alt="" className="w-48 h-48 object-cover rounded-2xl mx-auto mb-6" />
+                <img src={step.image} alt="" className="w-48 h-48 object-cover rounded-2xl mx-auto mb-6 md:w-64 md:h-64" />
               )}
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">{step.title}</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-4 md:text-3xl">{step.title}</h2>
               {step.description && (
-                <p className="text-gray-600 text-lg">{step.description}</p>
+                <p className="text-gray-600 text-lg md:text-xl">{step.description}</p>
               )}
               <button
                 onClick={handleNext}
-                className="mt-8 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all"
+                className="mt-8 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all md:px-10 md:py-5 md:text-xl"
               >
                 继续 🚀
               </button>
@@ -197,11 +196,11 @@ export default function CoursePage() {
           
           {step.type === 'quiz' && (
             <div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">{step.title}</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center md:text-3xl">{step.title}</h2>
               {step.question && (
-                <p className="text-xl text-gray-700 text-center mb-8">{step.question}</p>
+                <p className="text-xl text-gray-700 text-center mb-8 md:text-2xl">{step.question}</p>
               )}
-              <div className="space-y-4">
+              <div className="space-y-4 md:space-y-6">
                 {step.options?.map((option, index) => (
                   <button
                     key={index}
@@ -215,19 +214,19 @@ export default function CoursePage() {
                         : selectedAnswer === option
                         ? 'bg-red-100 border-2 border-red-500'
                         : 'bg-gray-100 opacity-50'
-                    }`}
+                    } md:p-6`}
                   >
                     <div className="flex items-center justify-between">
-                      <span>{option}</span>
+                      <span className="md:text-xl">{option}</span>
                       {selectedAnswer === option && (
                         isCorrect ? (
-                          <CheckCircle2 className="w-6 h-6 text-green-500" />
+                          <CheckCircle2 className="w-6 h-6 text-green-500 md:w-8 md:h-8" />
                         ) : (
-                          <span className="text-red-500">✗</span>
+                          <span className="text-red-500 md:text-2xl">✗</span>
                         )
                       )}
                       {selectedAnswer !== null && option === step.correctAnswer && selectedAnswer !== option && (
-                        <CheckCircle2 className="w-6 h-6 text-green-500" />
+                        <CheckCircle2 className="w-6 h-6 text-green-500 md:w-8 md:h-8" />
                       )}
                     </div>
                   </button>
@@ -236,7 +235,7 @@ export default function CoursePage() {
               {selectedAnswer && (
                 <button
                   onClick={handleNext}
-                  className="mt-8 w-full bg-gradient-to-r from-green-500 to-teal-500 text-white py-4 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all"
+                  className="mt-8 w-full bg-gradient-to-r from-green-500 to-teal-500 text-white py-4 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all md:py-5 md:text-xl"
                 >
                   {isCorrect ? '太棒了！继续 →' : '再试一次 →'}
                 </button>
@@ -246,14 +245,14 @@ export default function CoursePage() {
           
           {step.type === 'complete' && (
             <div className="text-center">
-              <div className="text-8xl mb-6">🎉</div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">{step.title}</h2>
+              <div className="text-8xl mb-6 md:text-9xl">🎉</div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-4 md:text-3xl">{step.title}</h2>
               {step.description && (
-                <p className="text-gray-600 text-lg mb-8">{step.description}</p>
+                <p className="text-gray-600 text-lg mb-8 md:text-xl">{step.description}</p>
               )}
               <button
                 onClick={handleNext}
-                className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all"
+                className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all md:px-10 md:py-5 md:text-xl"
               >
                 完成课程 🏆
               </button>

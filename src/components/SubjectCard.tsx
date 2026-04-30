@@ -23,15 +23,15 @@ export default function SubjectCard({ subject, isTvFocused = false, onClick }: S
         isTvFocused 
           ? 'scale-110 shadow-2xl ring-4 ring-white ring-opacity-80' 
           : 'hover:scale-105 hover:shadow-xl'
-      } ${isTvFocused ? 'p-8' : 'p-6'}`}
+      } ${isTvFocused ? 'p-8' : 'p-6 md:p-7'}`}
     >
-      <div className={`mb-3 text-center ${isTvFocused ? 'text-8xl' : 'text-6xl'}`}>
+      <div className={`mb-3 text-center ${isTvFocused ? 'text-8xl' : 'text-6xl md:text-7xl'}`}>
         {subject.icon}
       </div>
-      <h3 className={`font-bold text-white text-center mb-2 ${isTvFocused ? 'text-3xl' : 'text-2xl'}`}>
+      <h3 className={`font-bold text-white text-center mb-2 ${isTvFocused ? 'text-3xl' : 'text-2xl md:text-2xl'}`}>
         {subject.name}
       </h3>
-      <p className={`text-white/80 text-center ${isTvFocused ? 'text-lg' : 'text-sm'}`}>
+      <p className={`text-white/80 text-center ${isTvFocused ? 'text-lg' : 'text-sm md:text-base'}`}>
         {subject.description}
       </p>
     </div>
