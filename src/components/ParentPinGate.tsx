@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Shield, Lock, X } from 'lucide-react';
+import { Shield, X } from 'lucide-react';
 
 interface ParentPinGateProps {
   isOpen: boolean;

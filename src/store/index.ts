@@ -2,7 +2,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { User, LearningProgress, UserPoints, UserAchievement, UserInventory, Course } from '../types';
-import { courses, achievements, shopItems, subjects } from '../data/initialData';
+import { courses, achievements, shopItems } from '../data/initialData';
 
 interface AppState {
   user: User | null;
@@ -46,6 +46,23 @@ interface AppState {
   checkTimeLimit: () => boolean;
 }
 
+interface StoredUser {
+  id: string;
+  email: string;
+  username: string;
+  avatar: string;
+  level: number;
+  lastStudyDate?: string;
+  todayStudyTime?: number;
+  learningProgress: LearningProgress[];
+  userPoints: UserPoints;
+  userAchievements: UserAchievement[];
+  userInventory: UserInventory[];
+  dailyTimeLimit: number;
+  soundEnabled: boolean;
+  tvMode: boolean;
+}
+
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
 const getTodayString = () => {
@@ -69,9 +86,9 @@ export const useAppStore = create<AppState>()(
       todayStudyTime: 0,
       lastStudyDate: getTodayString(),
       
-      login: async (email: string, password: string) => {
-        const storedUsers = JSON.parse(localStorage.getItem('kids-edu-users') || '[]');
-        const user = storedUsers.find((u: any) => u.email === email);
+      login: async (email: string, _password: string) => {
+        const storedUsers = JSON.parse(localStorage.getItem('kids-edu-users') || '[]') as StoredUser[];
+        const user = storedUsers.find((u) => u.email === email);
         
         if (user) {
           const today = getTodayString();
@@ -97,8 +114,8 @@ export const useAppStore = create<AppState>()(
       },
       
       register: async (username: string, email: string, password: string) => {
-        const storedUsers = JSON.parse(localStorage.getItem('kids-edu-users') || '[]');
-        const existingUser = storedUsers.find((u: any) => u.email === email);
+        const storedUsers = JSON.parse(localStorage.getItem('kids-edu-users') || '[]') as StoredUser[];
+        const existingUser = storedUsers.find((u) => u.email === email);
         
         if (existingUser) {
           return false;
@@ -120,6 +137,7 @@ export const useAppStore = create<AppState>()(
           availablePoints: 0
         };
         
+        const today = getTodayString();
         const updatedUsers = [...storedUsers, { 
           ...newUser, 
           learningProgress: [], 
@@ -130,7 +148,7 @@ export const useAppStore = create<AppState>()(
           soundEnabled: true,
           tvMode: false,
           todayStudyTime: 0,
-          lastStudyDate: getTodayString()
+          lastStudyDate: today
         }];
         
         localStorage.setItem('kids-edu-users', JSON.stringify(updatedUsers));
@@ -146,7 +164,7 @@ export const useAppStore = create<AppState>()(
           soundEnabled: true,
           tvMode: false,
           todayStudyTime: 0,
-          lastStudyDate: getTodayString()
+          lastStudyDate: today
         });
         
         return true;
@@ -157,8 +175,8 @@ export const useAppStore = create<AppState>()(
                 dailyTimeLimit, soundEnabled, tvMode, todayStudyTime, lastStudyDate } = get();
         
         if (user) {
-          const storedUsers = JSON.parse(localStorage.getItem('kids-edu-users') || '[]');
-          const updatedUsers = storedUsers.map((u: any) => 
+          const storedUsers = JSON.parse(localStorage.getItem('kids-edu-users') || '[]') as StoredUser[];
+          const updatedUsers = storedUsers.map((u) => 
             u.id === user.id 
               ? { ...u, learningProgress, userPoints, userAchievements, userInventory,
                   dailyTimeLimit, soundEnabled, tvMode, todayStudyTime, lastStudyDate }
@@ -203,8 +221,7 @@ export const useAppStore = create<AppState>()(
       },
       
       updateProgress: (courseId: string, progress: number, studyTime: number) => {
-        const { user, learningProgress } = get();
-        if (!user) return;
+        const { learningProgress } = get();
         
         get().addStudyTime(studyTime);
         
@@ -218,8 +235,8 @@ export const useAppStore = create<AppState>()(
       },
       
       completeCourse: (courseId: string) => {
-        const { user, learningProgress, userPoints } = get();
-        if (!user || !userPoints) return;
+        const { learningProgress, userPoints } = get();
+        if (!userPoints) return;
         
         const course = courses.find(c => c.id === courseId);
         if (!course) return;
@@ -343,11 +360,8 @@ export const useAppStore = create<AppState>()(
       },
       
       resetAllData: () => {
-        const { user } = get();
-        if (user) {
-          localStorage.removeItem('kids-edu-users');
-          localStorage.removeItem('kids-edu-storage');
-        }
+        localStorage.removeItem('kids-edu-users');
+        localStorage.removeItem('kids-edu-storage');
         set({ 
           user: null, 
           isLoggedIn: false,

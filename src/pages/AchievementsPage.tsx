@@ -8,7 +8,6 @@ import NavBar from '../components/NavBar';
 export default function AchievementsPage() {
   const [activeTab, setActiveTab] = useState<'achievements' | 'shop'>('achievements');
   const navigate = useNavigate();
-  const user = useAppStore(state => state.user);
   const isLoggedIn = useAppStore(state => state.isLoggedIn);
   const userPoints = useAppStore(state => state.userPoints);
   const userAchievements = useAppStore(state => state.userAchievements);

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store';
@@ -24,7 +25,7 @@ export default function Login() {
           localStorage.removeItem('kids-edu-storage');
         }
       }
-    } catch (e) {
+    } catch {
       localStorage.removeItem('kids-edu-storage');
       localStorage.removeItem('kids-edu-users');
     }
@@ -53,7 +54,7 @@ export default function Login() {
       if (success) {
         navigate('/');
       }
-    } catch (err) {
+    } catch {
       setError('发生错误，请重试');
     } finally {
       setLoading(false);

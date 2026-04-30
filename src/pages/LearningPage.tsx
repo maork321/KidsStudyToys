@@ -7,7 +7,6 @@ import NavBar from '../components/NavBar';
 
 export default function LearningPage() {
   const navigate = useNavigate();
-  const user = useAppStore(state => state.user);
   const isLoggedIn = useAppStore(state => state.isLoggedIn);
   const learningProgress = useAppStore(state => state.learningProgress);
   const getCompletedCourses = useAppStore(state => state.getCompletedCourses);

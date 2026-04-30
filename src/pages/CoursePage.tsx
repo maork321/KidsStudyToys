@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { courses } from '../data/initialData';
 import { useAppStore } from '../store';
 import { useSpeech } from '../utils/speech';
-import { ArrowLeft, CheckCircle2, Trophy, Volume2, VolumeX } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Volume2, VolumeX } from 'lucide-react';
 
 export default function CoursePage() {
   const { id } = useParams<{ id: string }>();

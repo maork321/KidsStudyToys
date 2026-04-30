@@ -17,7 +17,6 @@ export default function ParentCenter() {
   const toggleSound = useAppStore(state => state.toggleSound);
   const toggleTvMode = useAppStore(state => state.toggleTvMode);
   const resetAllData = useAppStore(state => state.resetAllData);
-  const logout = useAppStore(state => state.logout);
   
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [timeLimitValue, setTimeLimitValue] = useState(dailyTimeLimit);
