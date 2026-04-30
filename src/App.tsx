@@ -9,6 +9,7 @@ import ProfilePage from "@/pages/ProfilePage";
 import ParentCenter from "@/pages/ParentCenter";
 import MathPractice from "@/pages/MathPractice";
 import Settings from "@/pages/Settings";
+import Footer from "@/components/Footer";
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
         <Route path="/math-practice" element={<MathPractice />} />
         <Route path="/settings" element={<Settings />} />
       </Routes>
+      <Footer />
     </Router>
   );
 }

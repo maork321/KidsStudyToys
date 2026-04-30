@@ -1,16 +1,19 @@
 {
   "name": "kids-edu-platform",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "面向4-8岁小朋友的多学科在线教育平台",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "npm run version:patch && tsc --noEmit && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "check": "tsc --noEmit",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "version:patch": "npm version patch --git-tag-version false",
+    "version:minor": "npm version minor --git-tag-version false",
+    "version:major": "npm version major --git-tag-version false"
   },
   "dependencies": {
     "clsx": "^2.1.1",
@@ -26,7 +29,7 @@
     "@eslint/js": "^9.25.0",
     "@types/node": "^22.15.30",
     "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
+    "@types/react-dom": "^18.3.12",
     "@vitejs/plugin-react": "^4.4.1",
     "autoprefixer": "^10.4.21",
     "babel-plugin-react-dev-locator": "^1.0.0",

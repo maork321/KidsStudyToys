@@ -4,8 +4,27 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import { useAppStore } from '../store';
 import { useSpeech } from '../utils/speech';
 import { generateMathExercise, MathProblem, MathConfig } from '../utils/mathGenerator';
-import { ArrowLeft, Volume2, Calculator, CheckCircle2, XCircle, Home, RotateCcw, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Volume2, Calculator, CheckCircle2, XCircle, Home, RotateCcw, AlertCircle, Clock, BarChart3, RotateCw } from 'lucide-react';
 import Confetti from '../components/Confetti';
+
+// 错题记录类型
+interface WrongProblem {
+  operand1: number;
+  operand2: number;
+  operator: string;
+  answer: number;
+  userAnswer: number;
+  timestamp: number;
+  attemptCount: number;
+}
+
+// 题目统计类型
+interface ProblemStats {
+  problem: MathProblem;
+  userAnswer: number | null;
+  isCorrect: boolean;
+  timeSpent: number;
+}
 
 export default function MathPractice() {
   const navigate = useNavigate();
@@ -14,7 +33,7 @@ export default function MathPractice() {
   const isLoggedIn = useAppStore(state => state.isLoggedIn);
   const soundEnabled = useAppStore(state => state.soundEnabled);
   
-  const [mode, setMode] = useState<'setup' | 'practice' | 'result'>('setup');
+  const [mode, setMode] = useState<'setup' | 'practice' | 'stats' | 'result'>('setup');
   const [config, setConfig] = useState<MathConfig>({
     maxNumber: 10,
     questionCount: 10,
@@ -32,12 +51,32 @@ export default function MathPractice() {
   const [showConfetti, setShowConfetti] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   
+  // 计时相关
+  const [totalElapsedTime, setTotalElapsedTime] = useState(0);
+  const [problemStartTime, setProblemStartTime] = useState<number | null>(null);
+  const [problemTime, setProblemTime] = useState(0);
+  
+  // 统计相关
+  const [problemStats, setProblemStats] = useState<ProblemStats[]>([]);
+  
+  // 错题记录
+  const [wrongProblems, setWrongProblems] = useState<WrongProblem[]>(() => {
+    try {
+      const saved = localStorage.getItem('mathWrongProblems');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+  
   // 使用 ref 保存最新的状态，避免闭包问题
   const problemsRef = useRef<MathProblem[]>([]);
   const currentIndexRef = useRef(0);
   const soundEnabledRef = useRef(soundEnabled);
   const scoreRef = useRef(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const totalTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const problemTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   // 同步 ref 和 state
   useEffect(() => {
@@ -62,14 +101,26 @@ export default function MathPractice() {
     }
   }, [isLoggedIn, navigate]);
   
-  // 清理 timeout
+  // 清理所有 timer
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
+      if (totalTimerRef.current) {
+        clearInterval(totalTimerRef.current);
+      }
+      if (problemTimerRef.current) {
+        clearInterval(problemTimerRef.current);
+      }
     };
   }, []);
+  
+  // 保存错题记录
+  const saveWrongProblems = (problems: WrongProblem[]) => {
+    setWrongProblems(problems);
+    localStorage.setItem('mathWrongProblems', JSON.stringify(problems));
+  };
   
   // 朗读题目 - 使用 ref 确保读取最新的值
   const speakProblem = () => {
@@ -94,7 +145,48 @@ export default function MathPractice() {
       clearTimeout(timeoutRef.current);
     }
     
-    const newProblems = generateMathExercise(config);
+    // 清理之前的计时器
+    if (totalTimerRef.current) {
+      clearInterval(totalTimerRef.current);
+    }
+    if (problemTimerRef.current) {
+      clearInterval(problemTimerRef.current);
+    }
+    
+    // 重置所有状态
+    setTotalElapsedTime(0);
+    setProblemTime(0);
+    setProblemStats([]);
+    
+    // 生成题目
+    let newProblems = generateMathExercise(config);
+    
+    // 如果有错题记录，优先使用错题（最多占一半）
+    if (wrongProblems.length > 0) {
+      const wrongCount = Math.min(Math.floor(config.questionCount / 2), wrongProblems.length);
+      const selectedWrong = [...wrongProblems]
+        .sort((a, b) => a.attemptCount - b.attemptCount)
+        .slice(0, wrongCount);
+      
+      const wrongProblemsConverted: MathProblem[] = selectedWrong.map(wp => ({
+        id: Date.now() + Math.random(),
+        operand1: wp.operand1,
+        operand2: wp.operand2,
+        operator: wp.operator as '+' | '-' | '×' | '÷',
+        answer: wp.answer,
+        options: generateOptions(wp.answer, config.maxNumber)
+      }));
+      
+      const normalProblems = generateMathExercise({
+        ...config,
+        questionCount: (config.questionCount - wrongCount) as 5 | 10 | 20 | 50
+      });
+      
+      newProblems = [...wrongProblemsConverted, ...normalProblems];
+      // 打乱顺序
+      newProblems = newProblems.sort(() => Math.random() - 0.5);
+    }
+    
     setProblems(newProblems);
     problemsRef.current = newProblems;
     setCurrentIndex(0);
@@ -107,8 +199,108 @@ export default function MathPractice() {
     setShowFeedback(false);
     setMode('practice');
     
+    // 启动总计时器
+    totalTimerRef.current = setInterval(() => {
+      setTotalElapsedTime(prev => prev + 1);
+    }, 1000);
+    
+    // 启动题目计时器
+    startProblemTimer();
+    
     // 延迟朗读第一题
     setTimeout(() => speakProblem(), 500);
+  };
+  
+  // 生成选择题选项
+  const generateOptions = (answer: number, maxNumber: number) => {
+    const options = [answer];
+    while (options.length < 4) {
+      const offset = Math.floor(Math.random() * 10) - 5;
+      const wrong = answer + offset;
+      if (wrong >= 0 && wrong <= maxNumber * 2 && !options.includes(wrong)) {
+        options.push(wrong);
+      }
+    }
+    return options.sort(() => Math.random() - 0.5);
+  };
+  
+  // 启动题目计时器
+  const startProblemTimer = () => {
+    setProblemTime(0);
+    setProblemStartTime(Date.now());
+    if (problemTimerRef.current) {
+      clearInterval(problemTimerRef.current);
+    }
+    problemTimerRef.current = setInterval(() => {
+      setProblemTime(prev => prev + 1);
+    }, 1000);
+  };
+  
+  // 停止题目计时器
+  const stopProblemTimer = () => {
+    if (problemTimerRef.current) {
+      clearInterval(problemTimerRef.current);
+      problemTimerRef.current = null;
+    }
+    const timeSpent = problemStartTime ? Math.floor((Date.now() - problemStartTime) / 1000) : problemTime;
+    return timeSpent;
+  };
+  
+  // 记录题目统计
+  const recordProblemStat = (isCorrect: boolean, userAnswerVal: number | null, timeSpent: number) => {
+    const currentProblems = problemsRef.current;
+    const index = currentIndexRef.current;
+    const problem = currentProblems[index];
+    
+    if (!problem) return;
+    
+    const newStat: ProblemStats = {
+      problem,
+      userAnswer: userAnswerVal,
+      isCorrect,
+      timeSpent
+    };
+    
+    setProblemStats(prev => [...prev, newStat]);
+    
+    // 记录错题
+    if (!isCorrect) {
+      const existingWrong = wrongProblems.find(
+        wp => wp.operand1 === problem.operand1 &&
+              wp.operand2 === problem.operand2 &&
+              wp.operator === problem.operator
+      );
+      
+      if (existingWrong) {
+        const updatedWrong = wrongProblems.map(wp => 
+          wp === existingWrong 
+            ? { ...wp, attemptCount: wp.attemptCount + 1, timestamp: Date.now() }
+            : wp
+        );
+        saveWrongProblems(updatedWrong);
+      } else {
+        const newWrong: WrongProblem = {
+          operand1: problem.operand1,
+          operand2: problem.operand2,
+          operator: problem.operator,
+          answer: problem.answer,
+          userAnswer: userAnswerVal || 0,
+          timestamp: Date.now(),
+          attemptCount: 1
+        };
+        saveWrongProblems([...wrongProblems, newWrong]);
+      }
+    } else {
+      // 如果答对了，从错题中移除
+      const filteredWrong = wrongProblems.filter(
+        wp => !(wp.operand1 === problem.operand1 &&
+              wp.operand2 === problem.operand2 &&
+              wp.operator === problem.operator)
+      );
+      if (filteredWrong.length !== wrongProblems.length) {
+        saveWrongProblems(filteredWrong);
+      }
+    }
   };
   
   // 处理选择题答案
@@ -125,9 +317,13 @@ export default function MathPractice() {
     const problem = currentProblems[index];
     const correct = answer === problem.answer;
     
+    const timeSpent = stopProblemTimer();
+    
     setSelectedAnswer(answer);
     setIsCorrect(correct);
     setShowFeedback(true);
+    
+    recordProblemStat(correct, answer, timeSpent);
     
     if (correct) {
       setScore(prev => prev + 1);
@@ -144,25 +340,7 @@ export default function MathPractice() {
     
     // 自动跳转到下一题
     timeoutRef.current = setTimeout(() => {
-      if (currentIndexRef.current < currentProblems.length - 1) {
-        const nextIndex = currentIndexRef.current + 1;
-        setCurrentIndex(nextIndex);
-        currentIndexRef.current = nextIndex;
-        setSelectedAnswer(null);
-        setIsCorrect(null);
-        setShowFeedback(false);
-        setUserAnswer('');
-        
-        // 朗读下一题
-        setTimeout(() => {
-          speakProblem();
-        }, 500);
-      } else {
-        setMode('result');
-        if (soundEnabledRef.current) {
-          speak('练习完成！你答对了' + scoreRef.current + '道题');
-        }
-      }
+      goToNextProblem(currentProblems);
     }, 1500);
   };
   
@@ -181,8 +359,12 @@ export default function MathPractice() {
     const numAnswer = parseInt(userAnswer);
     const correct = numAnswer === problem.answer;
     
+    const timeSpent = stopProblemTimer();
+    
     setIsCorrect(correct);
     setShowFeedback(true);
+    
+    recordProblemStat(correct, numAnswer, timeSpent);
     
     if (correct) {
       setScore(prev => prev + 1);
@@ -199,25 +381,33 @@ export default function MathPractice() {
     
     // 自动跳转到下一题
     timeoutRef.current = setTimeout(() => {
-      if (currentIndexRef.current < currentProblems.length - 1) {
-        const nextIndex = currentIndexRef.current + 1;
-        setCurrentIndex(nextIndex);
-        currentIndexRef.current = nextIndex;
-        setIsCorrect(null);
-        setShowFeedback(false);
-        setUserAnswer('');
-        
-        // 朗读下一题
-        setTimeout(() => {
-          speakProblem();
-        }, 500);
-      } else {
-        setMode('result');
-        if (soundEnabledRef.current) {
-          speak('练习完成！你答对了' + scoreRef.current + '道题');
-        }
-      }
+      goToNextProblem(currentProblems);
     }, 1500);
+  };
+  
+  // 跳转下一题
+  const goToNextProblem = (currentProblems: MathProblem[]) => {
+    if (currentIndexRef.current < currentProblems.length - 1) {
+      const nextIndex = currentIndexRef.current + 1;
+      setCurrentIndex(nextIndex);
+      currentIndexRef.current = nextIndex;
+      setSelectedAnswer(null);
+      setIsCorrect(null);
+      setShowFeedback(false);
+      setUserAnswer('');
+      
+      startProblemTimer();
+      
+      // 朗读下一题
+      setTimeout(() => {
+        speakProblem();
+      }, 500);
+    } else {
+      setMode('stats');
+      if (soundEnabledRef.current) {
+        speak('练习完成！你答对了' + scoreRef.current + '道题');
+      }
+    }
   };
   
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -230,6 +420,14 @@ export default function MathPractice() {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
+    if (totalTimerRef.current) {
+      clearInterval(totalTimerRef.current);
+      totalTimerRef.current = null;
+    }
+    if (problemTimerRef.current) {
+      clearInterval(problemTimerRef.current);
+      problemTimerRef.current = null;
+    }
     setMode('setup');
     setProblems([]);
     problemsRef.current = [];
@@ -241,13 +439,31 @@ export default function MathPractice() {
     setSelectedAnswer(null);
     setIsCorrect(null);
     setShowFeedback(false);
+    setTotalElapsedTime(0);
+    setProblemTime(0);
+    setProblemStats([]);
   };
   
   const handleExit = () => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
+    if (totalTimerRef.current) {
+      clearInterval(totalTimerRef.current);
+      totalTimerRef.current = null;
+    }
+    if (problemTimerRef.current) {
+      clearInterval(problemTimerRef.current);
+      problemTimerRef.current = null;
+    }
     resetPractice();
+    navigate('/');
+  };
+  
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
   
   if (!isLoggedIn) {
@@ -259,7 +475,13 @@ export default function MathPractice() {
       <div className="min-h-screen bg-gradient-to-br from-indigo-400 via-purple-400 to-pink-400 flex items-center justify-center p-4 md:p-8">
         <div className="w-full max-w-lg md:max-w-2xl">
           <div className="bg-white rounded-[2rem] p-8 shadow-2xl md:p-12">
-            <div className="text-center mb-8">
+            <div className="text-center mb-8 relative">
+              <button
+                onClick={handleExit}
+                className="absolute left-0 top-0 p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-all"
+              >
+                <ArrowLeft className="w-5 h-5 text-gray-600" />
+              </button>
               <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full mb-4 shadow-lg md:w-24 md:h-24">
                 <Calculator className="w-10 h-10 text-white md:w-12 md:h-12" />
               </div>
@@ -267,6 +489,11 @@ export default function MathPractice() {
                 数学练习
               </h1>
               <p className="text-gray-500 mt-2 md:text-lg">挑战自我，提升计算能力</p>
+              {wrongProblems.length > 0 && (
+                <p className="text-orange-500 mt-2 text-sm md:text-base">
+                  📚 有 {wrongProblems.length} 道错题等待复习
+                </p>
+              )}
             </div>
             
             <div className="space-y-8">
@@ -401,47 +628,110 @@ export default function MathPractice() {
     );
   }
   
-  if (mode === 'result') {
+  if (mode === 'stats') {
     const percentage = Math.round((score / problems.length) * 100);
     const stars = percentage >= 90 ? 3 : percentage >= 70 ? 2 : percentage >= 50 ? 1 : 0;
     
     return (
-      <div className="min-h-screen bg-gradient-to-br from-yellow-400 via-orange-400 to-red-400 flex items-center justify-center p-4 md:p-8">
+      <div className="min-h-screen bg-gradient-to-br from-green-400 via-teal-400 to-blue-400 p-4 md:p-8">
         <Confetti isActive={score > problems.length / 2} />
-        <div className="w-full max-w-md md:max-w-lg">
-          <div className="bg-white rounded-[2rem] p-8 shadow-2xl text-center md:p-12">
-            <div className="relative mb-6">
-              <div className="text-8xl md:text-9xl animate-bounce">
-                {percentage >= 90 ? '🎉' : percentage >= 70 ? '👏' : percentage >= 50 ? '💪' : '📚'}
-              </div>
-              {percentage >= 90 && (
-                <div className="absolute -top-2 -right-2 bg-yellow-400 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg animate-pulse">
-                  完美
+        <div className="w-full max-w-2xl mx-auto">
+          <div className="bg-white rounded-[2rem] p-8 shadow-2xl md:p-12 mb-6">
+            <div className="text-center mb-8">
+              <div className="relative mb-6">
+                <div className="text-8xl md:text-9xl animate-bounce">
+                  {percentage >= 90 ? '🎉' : percentage >= 70 ? '👏' : percentage >= 50 ? '💪' : '📚'}
                 </div>
-              )}
-            </div>
-            
-            <h1 className="text-4xl font-bold text-gray-800 mb-2 md:text-5xl">
-              {percentage >= 90 ? '太棒了！' : percentage >= 70 ? '做得好！' : percentage >= 50 ? '还不错！' : '继续加油！'}
-            </h1>
-            
-            <p className="text-gray-600 mb-6 md:text-lg">
-              你答对了 <span className="font-bold text-indigo-600">{score}</span> / {problems.length} 道题
-            </p>
-            
-            <div className="flex justify-center gap-2 mb-6">
-              {[1, 2, 3].map(i => (
-                <span key={i} className="text-5xl md:text-6xl transition-transform duration-300" style={{ animationDelay: `${i * 0.1}s` }}>
-                  {i <= stars ? '⭐' : '☆'}
-                </span>
-              ))}
-            </div>
-            
-            <div className="bg-gradient-to-r from-yellow-100 to-orange-100 rounded-2xl p-6 mb-6 md:p-8">
-              <div className="text-6xl font-black bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent mb-2 md:text-7xl">
-                {percentage}%
+                {percentage >= 90 && (
+                  <div className="absolute -top-2 -right-2 bg-yellow-400 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg animate-pulse">
+                    完美
+                  </div>
+                )}
               </div>
-              <div className="text-gray-600 font-medium md:text-lg">正确率</div>
+              
+              <h1 className="text-4xl font-bold text-gray-800 mb-2 md:text-5xl">
+                {percentage >= 90 ? '太棒了！' : percentage >= 70 ? '做得好！' : percentage >= 50 ? '还不错！' : '继续加油！'}
+              </h1>
+              
+              <p className="text-gray-600 mb-6 md:text-lg">
+                你答对了 <span className="font-bold text-indigo-600">{score}</span> / {problems.length} 道题
+              </p>
+              
+              <div className="flex justify-center gap-2 mb-6">
+                {[1, 2, 3].map(i => (
+                  <span key={i} className="text-5xl md:text-6xl transition-transform duration-300" style={{ animationDelay: `${i * 0.1}s` }}>
+                    {i <= stars ? '⭐' : '☆'}
+                  </span>
+                ))}
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="bg-gradient-to-r from-yellow-100 to-orange-100 rounded-2xl p-6">
+                  <div className="text-4xl font-black bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent mb-2">
+                    {percentage}%
+                  </div>
+                  <div className="text-gray-600 font-medium">正确率</div>
+                </div>
+                
+                <div className="bg-gradient-to-r from-indigo-100 to-purple-100 rounded-2xl p-6 flex items-center justify-center gap-3">
+                  <Clock className="w-6 h-6 text-indigo-600" />
+                  <div>
+                    <div className="text-2xl font-bold text-indigo-600">{formatTime(totalElapsedTime)}</div>
+                    <div className="text-gray-600 font-medium text-sm">总用时</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* 详细统计 */}
+            <div className="border-t border-gray-200 pt-6 mb-6">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                <BarChart3 className="w-6 h-6 mr-2" />
+                详细统计
+              </h2>
+              
+              <div className="space-y-3 max-h-64 overflow-y-auto">
+                {problemStats.map((stat, index) => (
+                  <div 
+                    key={index}
+                    className={`p-4 rounded-xl flex items-center justify-between ${
+                      stat.isCorrect 
+                        ? 'bg-green-50 border border-green-200' 
+                        : 'bg-red-50 border border-red-200'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+                        stat.isCorrect 
+                          ? 'bg-green-500 text-white' 
+                          : 'bg-red-500 text-white'
+                      }`}>
+                        {index + 1}
+                      </div>
+                      <div>
+                        <div className="font-bold text-gray-800">
+                          {stat.problem.operand1} {stat.problem.operator} {stat.problem.operand2} = {stat.problem.answer}
+                        </div>
+                        {!stat.isCorrect && (
+                          <div className="text-red-600 text-sm">
+                            你的答案: {stat.userAnswer}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="text-gray-600 text-sm">
+                        用时: {stat.timeSpent}秒
+                      </div>
+                      {stat.isCorrect ? (
+                        <CheckCircle2 className="w-6 h-6 text-green-500" />
+                      ) : (
+                        <XCircle className="w-6 h-6 text-red-500" />
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
             
             <div className="grid grid-cols-2 gap-3 md:gap-4">
@@ -453,11 +743,11 @@ export default function MathPractice() {
                 返回首页
               </button>
               <button
-                onClick={startPractice}
+                onClick={() => setMode('setup')}
                 className="py-4 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all md:text-lg md:py-5"
               >
                 <RotateCcw className="w-5 h-5" />
-                再练一次
+                重新配置
               </button>
             </div>
           </div>
@@ -490,10 +780,18 @@ export default function MathPractice() {
               />
             </div>
           </div>
-          <div className="bg-white/90 backdrop-blur rounded-full px-4 py-2 shadow-lg">
-            <span className="font-bold text-gray-700">
-              {currentIndex + 1}/{problems.length}
-            </span>
+          <div className="flex items-center gap-3">
+            <div className="bg-white/90 backdrop-blur rounded-full px-4 py-2 shadow-lg flex items-center gap-2">
+              <Clock className="w-5 h-5 text-orange-600" />
+              <span className="font-bold text-gray-700">
+                {formatTime(problemTime)}
+              </span>
+            </div>
+            <div className="bg-white/90 backdrop-blur rounded-full px-4 py-2 shadow-lg">
+              <span className="font-bold text-gray-700">
+                {currentIndex + 1}/{problems.length}
+              </span>
+            </div>
           </div>
         </div>
         
