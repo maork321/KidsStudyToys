@@ -44,10 +44,10 @@ export default function Login() {
     try {
       let success = false;
       if (isLogin) {
-        success = await login(email, password);
-        if (!success) setError('邮箱或密码错误');
+        success = await login(email);
+        if (!success) setError('邮箱不存在');
       } else {
-        success = await register(username, email, password);
+        success = await register(username, email);
         if (!success) setError('该邮箱已被注册');
       }
       

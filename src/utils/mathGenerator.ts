@@ -25,7 +25,7 @@ const generateOptions = (answer: number, maxNumber: number): number[] => {
   const range = Math.max(5, Math.ceil(maxNumber * 0.3));
   
   while (options.size < 4) {
-    let wrongAnswer = answer + generateNumber(-range, range);
+    const wrongAnswer = answer + generateNumber(-range, range);
     if (wrongAnswer > 0 && wrongAnswer !== answer) {
       options.add(wrongAnswer);
     }

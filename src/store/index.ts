@@ -22,8 +22,8 @@ interface AppState {
   lastStudyDate: string;
   
   // Actions
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (username: string, email: string, password: string) => Promise<boolean>;
+  login: (email: string) => Promise<boolean>;
+  register: (username: string, email: string) => Promise<boolean>;
   logout: () => void;
   
   startCourse: (courseId: string) => void;
@@ -52,6 +52,7 @@ interface StoredUser {
   username: string;
   avatar: string;
   level: number;
+  createdAt: Date;
   lastStudyDate?: string;
   todayStudyTime?: number;
   learningProgress: LearningProgress[];
@@ -86,7 +87,7 @@ export const useAppStore = create<AppState>()(
       todayStudyTime: 0,
       lastStudyDate: getTodayString(),
       
-      login: async (email: string, _password: string) => {
+      login: async (email: string) => {
         const storedUsers = JSON.parse(localStorage.getItem('kids-edu-users') || '[]') as StoredUser[];
         const user = storedUsers.find((u) => u.email === email);
         
@@ -113,7 +114,7 @@ export const useAppStore = create<AppState>()(
         return false;
       },
       
-      register: async (username: string, email: string, password: string) => {
+      register: async (username: string, email: string) => {
         const storedUsers = JSON.parse(localStorage.getItem('kids-edu-users') || '[]') as StoredUser[];
         const existingUser = storedUsers.find((u) => u.email === email);
         
