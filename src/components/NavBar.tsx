@@ -2,7 +2,15 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAppStore } from '../store';
-import { Home, BookOpen, Trophy, User, Coins } from 'lucide-react';
+import { Home, BookOpen, Trophy, User, Settings as SettingsIcon, Coins } from 'lucide-react';
+
+const navItems = [
+  { path: '/', icon: Home, label: '首页' },
+  { path: '/learning', icon: BookOpen, label: '学习' },
+  { path: '/achievements', icon: Trophy, label: '成就' },
+  { path: '/profile', icon: User, label: '我的' },
+  { path: '/settings', icon: SettingsIcon, label: '设置' },
+];
 
 export default function NavBar() {
   const userPoints = useAppStore(state => state.userPoints);
@@ -10,13 +18,6 @@ export default function NavBar() {
   const location = useLocation();
   
   const [activeIndex, setActiveIndex] = useState(0);
-  
-  const navItems = [
-    { path: '/', icon: Home, label: '首页' },
-    { path: '/learning', icon: BookOpen, label: '学习' },
-    { path: '/achievements', icon: Trophy, label: '成就' },
-    { path: '/profile', icon: User, label: '我的' },
-  ];
   
   useEffect(() => {
     const currentIndex = navItems.findIndex(item => location.pathname === item.path);

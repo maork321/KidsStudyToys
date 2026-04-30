@@ -8,6 +8,7 @@ import AchievementsPage from "@/pages/AchievementsPage";
 import ProfilePage from "@/pages/ProfilePage";
 import ParentCenter from "@/pages/ParentCenter";
 import MathPractice from "@/pages/MathPractice";
+import Settings from "@/pages/Settings";
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/parent" element={<ParentCenter />} />
         <Route path="/math-practice" element={<MathPractice />} />
+        <Route path="/settings" element={<Settings />} />
       </Routes>
     </Router>
   );

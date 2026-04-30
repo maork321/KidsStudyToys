@@ -1,6 +1,6 @@
 
 import { useParams, useNavigate, Navigate } from 'react-router-dom';
-import { subjects, courses } from '../data/initialData';
+import { courses } from '../data/initialData';
 import CourseCard from '../components/CourseCard';
 import NavBar from '../components/NavBar';
 import { useAppStore } from '../store';
@@ -10,6 +10,7 @@ export default function SubjectPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isLoggedIn = useAppStore(state => state.isLoggedIn);
+  const subjects = useAppStore(state => state.subjects);
   
   const subject = subjects.find(s => s.id === id);
   const subjectCourses = courses.filter(c => c.subjectId === id);
@@ -19,7 +20,11 @@ export default function SubjectPage() {
   }
   
   if (!subject) {
-    return <div>学科不存在</div>;
+    return <Navigate to="/" replace />;
+  }
+  
+  if (!subject.enabled) {
+    return <Navigate to="/" replace />;
   }
   
   const levels = Array.from(new Set(subjectCourses.map(c => c.level))).sort((a, b) => a - b);

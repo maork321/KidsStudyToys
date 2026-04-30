@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from 'react';
-import { subjects } from '../data/initialData';
 import SubjectCard from '../components/SubjectCard';
 import CourseCard from '../components/CourseCard';
 import NavBar from '../components/NavBar';
@@ -11,8 +10,11 @@ export default function Home() {
   const user = useAppStore(state => state.user);
   const isLoggedIn = useAppStore(state => state.isLoggedIn);
   const tvMode = useAppStore(state => state.tvMode);
+  const subjects = useAppStore(state => state.subjects);
   const getRecommendedCourses = useAppStore(state => state.getRecommendedCourses);
   const navigate = useNavigate();
+  
+  const enabledSubjects = subjects.filter(s => s.enabled);
   
   const recommendedCourses = getRecommendedCourses();
   const completedCount = useAppStore(state => state.learningProgress.filter(p => p.completed).length);
@@ -37,7 +39,7 @@ export default function Home() {
         case 'ArrowRight':
           e.preventDefault();
           if (focusSection === 'subjects') {
-            setFocusedSubject(prev => Math.min(subjects.length - 1, prev + 1));
+            setFocusedSubject(prev => Math.min(enabledSubjects.length - 1, prev + 1));
           } else {
             setFocusedCourse(prev => Math.min(recommendedCourses.length - 1, prev + 1));
           }
@@ -59,7 +61,7 @@ export default function Home() {
         case 'Enter':
           e.preventDefault();
           if (focusSection === 'subjects') {
-            navigate(`/subject/${subjects[focusedSubject].id}`);
+            navigate(`/subject/${enabledSubjects[focusedSubject].id}`);
           } else {
             navigate(`/course/${recommendedCourses[focusedCourse].id}`);
           }
@@ -69,7 +71,7 @@ export default function Home() {
     
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [tvMode, focusedSubject, focusedCourse, focusSection, navigate, recommendedCourses]);
+  }, [tvMode, focusedSubject, focusedCourse, focusSection, navigate, recommendedCourses, enabledSubjects]);
   
   if (!isLoggedIn) {
     return <Navigate to="/login" replace />;
@@ -127,7 +129,7 @@ export default function Home() {
             探索学科
           </h2>
           <div className={`grid ${gridCols} gap-4`}>
-            {subjects.map((subject, index) => (
+            {enabledSubjects.map((subject, index) => (
               <SubjectCard 
                 key={subject.id} 
                 subject={subject} 
@@ -136,6 +138,14 @@ export default function Home() {
               />
             ))}
           </div>
+          
+          {enabledSubjects.length === 0 && (
+            <div className="bg-white rounded-3xl p-8 text-center shadow-lg md:p-10">
+              <div className="text-6xl mb-4">🔒</div>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">暂无可学习的学科</h3>
+              <p className="text-gray-500">请前往设置页面开启学科</p>
+            </div>
+          )}
         </div>
         
         <div>

@@ -1,8 +1,8 @@
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { User, LearningProgress, UserPoints, UserAchievement, UserInventory, Course } from '../types';
-import { courses, achievements, shopItems } from '../data/initialData';
+import { User, LearningProgress, UserPoints, UserAchievement, UserInventory, Course, Subject } from '../types';
+import { courses, achievements, shopItems, subjects as initialSubjects } from '../data/initialData';
 
 interface AppState {
   user: User | null;
@@ -11,6 +11,9 @@ interface AppState {
   userPoints: UserPoints | null;
   userAchievements: UserAchievement[];
   userInventory: UserInventory[];
+  
+  // 学科设置
+  subjects: Subject[];
   
   // 家长控制设置
   dailyTimeLimit: number; // 分钟
@@ -37,6 +40,9 @@ interface AppState {
   purchaseItem: (itemId: string) => boolean;
   checkAchievements: () => void;
   
+  // 学科管理 Actions
+  toggleSubject: (subjectId: string) => void;
+  
   // 家长控制 Actions
   setDailyTimeLimit: (minutes: number) => void;
   toggleSound: () => void;
@@ -59,6 +65,7 @@ interface StoredUser {
   userPoints: UserPoints;
   userAchievements: UserAchievement[];
   userInventory: UserInventory[];
+  subjects: Subject[];
   dailyTimeLimit: number;
   soundEnabled: boolean;
   tvMode: boolean;
@@ -80,6 +87,8 @@ export const useAppStore = create<AppState>()(
       userPoints: null,
       userAchievements: [],
       userInventory: [],
+      
+      subjects: [...initialSubjects],
       
       dailyTimeLimit: 60,
       soundEnabled: true,
@@ -103,6 +112,7 @@ export const useAppStore = create<AppState>()(
             userPoints: user.userPoints || null,
             userAchievements: user.userAchievements || [],
             userInventory: user.userInventory || [],
+            subjects: user.subjects || [...initialSubjects],
             dailyTimeLimit: user.dailyTimeLimit || 60,
             soundEnabled: user.soundEnabled !== undefined ? user.soundEnabled : true,
             tvMode: user.tvMode || false,
@@ -145,6 +155,7 @@ export const useAppStore = create<AppState>()(
           userPoints: newUserPoints, 
           userAchievements: [], 
           userInventory: [],
+          subjects: [...initialSubjects],
           dailyTimeLimit: 60,
           soundEnabled: true,
           tvMode: false,
@@ -161,6 +172,7 @@ export const useAppStore = create<AppState>()(
           userPoints: newUserPoints,
           userAchievements: [],
           userInventory: [],
+          subjects: [...initialSubjects],
           dailyTimeLimit: 60,
           soundEnabled: true,
           tvMode: false,
@@ -173,14 +185,14 @@ export const useAppStore = create<AppState>()(
       
       logout: () => {
         const { user, learningProgress, userPoints, userAchievements, userInventory, 
-                dailyTimeLimit, soundEnabled, tvMode, todayStudyTime, lastStudyDate } = get();
+                subjects, dailyTimeLimit, soundEnabled, tvMode, todayStudyTime, lastStudyDate } = get();
         
         if (user) {
           const storedUsers = JSON.parse(localStorage.getItem('kids-edu-users') || '[]') as StoredUser[];
           const updatedUsers = storedUsers.map((u) => 
             u.id === user.id 
               ? { ...u, learningProgress, userPoints, userAchievements, userInventory,
-                  dailyTimeLimit, soundEnabled, tvMode, todayStudyTime, lastStudyDate }
+                  subjects, dailyTimeLimit, soundEnabled, tvMode, todayStudyTime, lastStudyDate }
               : u
           );
           localStorage.setItem('kids-edu-users', JSON.stringify(updatedUsers));
@@ -348,6 +360,16 @@ export const useAppStore = create<AppState>()(
         }
       },
       
+      toggleSubject: (subjectId: string) => {
+        const { subjects } = get();
+        const updatedSubjects = subjects.map(subject => 
+          subject.id === subjectId 
+            ? { ...subject, enabled: !subject.enabled } 
+            : subject
+        );
+        set({ subjects: updatedSubjects });
+      },
+      
       setDailyTimeLimit: (minutes: number) => {
         set({ dailyTimeLimit: minutes });
       },
@@ -370,6 +392,7 @@ export const useAppStore = create<AppState>()(
           userPoints: null,
           userAchievements: [],
           userInventory: [],
+          subjects: [...initialSubjects],
           dailyTimeLimit: 60,
           soundEnabled: true,
           tvMode: false,
@@ -404,6 +427,7 @@ export const useAppStore = create<AppState>()(
         userPoints: state.userPoints,
         userAchievements: state.userAchievements,
         userInventory: state.userInventory,
+        subjects: state.subjects,
         dailyTimeLimit: state.dailyTimeLimit,
         soundEnabled: state.soundEnabled,
         tvMode: state.tvMode,

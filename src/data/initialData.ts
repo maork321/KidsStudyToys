@@ -1,5 +1,5 @@
 
-import { Subject, Course, Achievement, ShopItem } from '../types';
+import { Subject, Course, Achievement, ShopItem, QuestionBank } from '../types';
 
 export const subjects: Subject[] = [
   {
@@ -7,28 +7,83 @@ export const subjects: Subject[] = [
     name: '语文',
     icon: '📚',
     color: 'from-pink-400 to-red-400',
-    description: '学习汉字、拼音、古诗'
+    description: '学习汉字、拼音、古诗',
+    enabled: true
   },
   {
     id: 'math',
     name: '数学',
     icon: '🔢',
     color: 'from-blue-400 to-cyan-400',
-    description: '认识数字、学习计算'
+    description: '认识数字、学习计算',
+    enabled: true
   },
   {
     id: 'english',
     name: '英语',
     icon: '🌍',
     color: 'from-green-400 to-teal-400',
-    description: '学习单词、简单对话'
+    description: '学习单词、简单对话',
+    enabled: true
   },
   {
     id: 'science',
     name: '科学',
     icon: '🔬',
     color: 'from-purple-400 to-indigo-400',
-    description: '探索自然、认识世界'
+    description: '探索自然、认识世界',
+    enabled: true
+  }
+];
+
+// 题库示例
+export const questionBanks: QuestionBank[] = [
+  {
+    id: 'math-bank-l1',
+    subjectId: 'math',
+    name: '数学入门题库',
+    description: '适合4-5岁小朋友的数学题目',
+    questions: [
+      {
+        id: 'q1',
+        type: 'calculation',
+        difficulty: 1,
+        content: '1 + 2 = ?',
+        options: ['2', '3', '4'],
+        correctAnswer: 3,
+        explanation: '1个苹果加2个苹果等于3个苹果'
+      },
+      {
+        id: 'q2',
+        type: 'multiple_choice',
+        difficulty: 1,
+        content: '🐱🐱🐱 有几只小猫？',
+        options: ['2只', '3只', '4只'],
+        correctAnswer: '3只',
+        explanation: '数一数，一共有3只小猫'
+      }
+    ],
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
+    id: 'chinese-bank-l1',
+    subjectId: 'chinese',
+    name: '语文入门题库',
+    description: '适合4-5岁小朋友的语文题目',
+    questions: [
+      {
+        id: 'q1',
+        type: 'character',
+        difficulty: 1,
+        content: '哪个是"一"？',
+        options: ['一', '二', '三'],
+        correctAnswer: '一',
+        explanation: '这是汉字"一"'
+      }
+    ],
+    createdAt: new Date(),
+    updatedAt: new Date()
   }
 ];
 
