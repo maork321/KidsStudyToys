@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store';
 
 export default function Login() {
@@ -32,8 +32,7 @@ export default function Login() {
   }, []);
   
   if (isLoggedIn) {
-    navigate('/');
-    return null;
+    return <Navigate to="/" replace />;
   }
   
   const handleSubmit = async (e: React.FormEvent) => {

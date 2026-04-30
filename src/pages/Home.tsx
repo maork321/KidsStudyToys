@@ -5,7 +5,7 @@ import SubjectCard from '../components/SubjectCard';
 import CourseCard from '../components/CourseCard';
 import NavBar from '../components/NavBar';
 import { useAppStore } from '../store';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 export default function Home() {
   const user = useAppStore(state => state.user);
@@ -72,8 +72,7 @@ export default function Home() {
   }, [tvMode, focusedSubject, focusedCourse, focusSection, navigate, recommendedCourses]);
   
   if (!isLoggedIn) {
-    navigate('/login');
-    return null;
+    return <Navigate to="/login" replace />;
   }
   
   const headerBg = tvMode ? 'bg-gradient-to-r from-blue-600 to-purple-600' : 'bg-gradient-to-r from-purple-500 to-pink-500';
